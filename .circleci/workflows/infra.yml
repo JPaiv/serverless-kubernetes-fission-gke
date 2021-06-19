@@ -72,8 +72,8 @@ jobs:
     working_directory: ~/project/terraform/test
     steps:
       - deploy:
-          gcloud_service_key: GCLOUD_SERVICE_KEY_TEST
-          google_project_id: GOOGLE_PROJECT_ID_TEST
+          gcloud_service_key: ${GCLOUD_SERVICE_KEY}
+          google_project_id: ${GOOGLE_PROJECT_ID_TEST}
 
   # deploy-prod:
   #   executor: default-executor
@@ -100,9 +100,9 @@ commands:
     description: Update infra
     parameters:
       gcloud_service_key:
-        type: env_var_name
+        type: ${GCLOUD_SERVICE_KEY}
       google_project_id:
-        type: env_var_name
+        type: ${GOOGLE_PROJECT_ID_TEST}
     steps:
       # Install deps, checkout repo & setup CLI tools:
       - checkout:
