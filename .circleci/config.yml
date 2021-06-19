@@ -1,99 +1,41 @@
 version: 2.1
 
+orbs:
+  # The python orb contains a set of prepackaged CircleCI configuration you can use repeatedly in your configuration files
+  # Orb commands and jobs help you with common scripting around a language/tool
+  # so you dont have to copy and paste it everywhere.
+  # See the orb documentation here: https://circleci.com/developer/orbs/orb/circleci/python
+  python: circleci/python@1.2
+
 workflows:
-  test-build-deploy:
+  sample:  # This is the name of the workflow, feel free to change it to better match your workflow.
+    # Inside the workflow, you define the jobs you want to run. 
+    # For more details on extending your workflow, see the configuration docs: https://circleci.com/docs/2.0/configuration-reference/#workflows 
     jobs:
-      - test
+      - build-and-test
 
-      # Push to any non-master branch triggers deployment to `dev` environment:
-      - deploy-dev:
-          requires:
-            - test
-          filters:
-            branches:
-              ignore:
-                - master
-
-      # Uncomment the following blocks to enable test and production environments:
-
-      # Push to master branch triggers deployment to `test` environment:
-      # - deploy-test:
-      #     requires:
-      #       - test
-      #     filters:
-      #       branches:
-      #         only: master
-
-      # Push to master branch triggers deployment to `production` environment, with a further manual approval step in CircleCI UI:
-      # - deploy-prod:
-      #     requires:
-      #       - test
-      #     filters:
-      #       branches:
-      #         only: master
-      #     type: approval
 
 jobs:
-  test:
+  build-and-test:  # This is the name of the job, feel free to change it to better match what you're trying to do!
+    # These next lines defines a Docker executors: https://circleci.com/docs/2.0/executor-types/
+    # You can specify an image from Dockerhub or use one of the convenience images from CircleCI's Developer Hub
+    # A list of available CircleCI Docker convenience images are available here: https://circleci.com/developer/images/image/cimg/python
+    # The executor is the environment in which the steps below will be executed - below will use a python 3.9 container
+    # Change the version below to your required version of python
     docker:
-      - image: circleci/node:10
+      - image: cimg/python:3.8
+    # Checkout the code as the first step. This is a dedicated CircleCI step.
+    # The python orb's install-packages step will install the dependencies from a Pipfile via Pipenv by default.
+    # Here we're making sure we use just use the system-wide pip. By default it uses the project root's requirements.txt.
+    # Then run your tests!
+    # CircleCI will report the results back to your VCS provider.
     steps:
       - checkout
-      - restore_cache:
-          keys:
-            - v1-dependencies-{{ checksum "app/yarn.lock" }}
-            - v1-dependencies-
-      - run:
-          name: Install dependencies
-          command: cd app && yarn install
-      - save_cache:
-          paths:
-            - ~/.cache/yarn
-            - app/node_modules
-          key: v1-dependencies-{{ checksum "app/yarn.lock" }}
+      - python/install-packages:
+          pkg-manager: pip
+          # app-dir: ~/project/package-directory/  # If you're requirements.txt isn't in the root directory.
+          # pip-dependency-file: test-requirements.txt  # if you have a different name for your requirements file, maybe one that combines your runtime and test requirements.
       - run:
           name: Run tests
-          command: cd app && yarn test
-
-  deploy-dev:
-    executor: default-executor
-    environment:
-      ENV: dev
-      PROJECT_NAME: gke-dev
-    working_directory: ~/project/terraform/dev
-    steps:
-      - deploy:
-          gcloud_service_key: GCLOUD_SERVICE_KEY_DEV
-          google_project_id: GOOGLE_PROJECT_ID_DEV
-
-  deploy-test:
-    executor: default-executor
-    environment:
-      ENV: test
-      PROJECT_NAME: gke-test
-    working_directory: ~/project/terraform/test
-    steps:
-      - deploy:
-          gcloud_service_key: ${GCP_SERVICE_KEY}
-          google_project_id: ${GCP_PROJECT_ID}
-
-  deploy-prod:
-    executor: default-executor
-    environment:
-      ENV: prod
-      PROJECT_NAME: gke-prod
-    working_directory: ~/project/terraform/prod
-    steps:
-      - deploy:
-          gcloud_service_key: GCLOUD_SERVICE_KEY_PROD
-          google_project_id: GOOGLE_PROJECT_ID_PROD
-
-
-executors:
-  default-executor:
-    docker:
-      - image: google/cloud-sdk:alpine
-    environment:
-      CLOUDSDK_CORE_DISABLE_PROMPTS: "1"
-      GOOGLE_APPLICATION_CREDENTIALS: /tmp/gcloud-service-key.json
-      TF_IN_AUTOMATION: "true"
+          # This assumes pytest is installed via the install-package step above
+          command: pytest
