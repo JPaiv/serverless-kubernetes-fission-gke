@@ -1,0 +1,23 @@
+apiVersion: fission.io/v1
+kind: HTTPTrigger
+metadata:
+  creationTimestamp: null
+  name: fa8cdebe-c557-4d6f-ac3e-5bdd8872a889
+  namespace: default
+spec:
+  createingress: false
+  functionref:
+    functionweights: null
+    name: greetings
+    type: name
+  host: ""
+  ingressconfig:
+    annotations: null
+    host: '*'
+    path: /form
+    tls: ""
+  method: ""
+  methods:
+  - GET
+  prefix: ""
+  relativeurl: /form
