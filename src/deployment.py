@@ -70,6 +70,9 @@ def _check_if_function_exists_in_specs(folder_name, specs_folder):
 
 
 def _create_function(folder_name):
+    """
+        Create a deployment ready function.
+    """
     subprocess.run(
         [f"fission fn create --name {folder_name} --env python --deploy {folder_name}.zip --entrypoint '{folder_name}/{folder_name}.main'"])
 
@@ -84,11 +87,17 @@ def _create_spec_for_function(folder_name):
 
 
 def _create_function_endpoint(folder_name):
+    """
+        Create endpoint for a created function.
+    """
     subprocess.run(
         [f"fission route create - -function {folder_name} - -url / {folder_name}"])
 
 
 def _get_function_deployment_file_name(folder_name):
+    """
+        Function deployment file name is the function folder name.
+    """
     return f"function-{folder_name}.yaml"
 
 
