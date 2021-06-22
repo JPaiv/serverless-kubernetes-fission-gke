@@ -81,7 +81,6 @@ def _create_spec_for_function(folder_name):
     """
         Every fission function needs a specification in order to be deployed. Create specification for a function to specs folder.
     """
-
     subprocess.run(
         [f"fission function create --spec --name {folder_name} --env python --src './{folder_name}' --entrypoint main.handler"])
 
