@@ -1,7 +1,7 @@
-import os
-from os import walk
 import logging
 import subprocess
+import os
+from os import walk
 
 logger = logging.getLogger()
 logger.setLevel(logging.DEBUG)
